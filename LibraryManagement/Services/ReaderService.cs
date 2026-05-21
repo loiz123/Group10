@@ -9,7 +9,7 @@ namespace Library_Management.Services
     /// Quản lý danh sách bạn đọc trong bộ nhớ.
     /// Nam Anh đã tích hợp FileStorage vào.
     /// </summary>
-    public class ReaderService
+    public class ReaderService: IManageable<Reader>
     {
         private List<Reader> _readers;
         private FileStorage<Reader> _storage;

@@ -55,6 +55,13 @@ namespace Library_Management
                         case "0":
                             isRunning = false;
                             Console.WriteLine("Đang đóng chương trình. Tạm biệt!");
+                            // Minh họa Polymorphism qua biến kiểu cha Person
+                            Person p1 = new Reader("R001", "Nguyen Van A", "0901", "a@a.com", "HCM", "SinhVien");
+                            Person p2 = new Librarian("L001", "Tran Thi B", "0902", "b@b.com", "HN", "NV001", "Quản lý", DateTime.Now);
+                            Console.WriteLine(p1.GetInfo());
+                            Console.WriteLine(p2.GetInfo());
+                            Console.WriteLine(p1.GetRole());
+                            Console.WriteLine(p2.GetRole());
                             break;
                         default:
                             Console.WriteLine("Lựa chọn không hợp lệ. Vui lòng nhập lại.");
