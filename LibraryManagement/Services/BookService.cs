@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Library_Management.Models;
+using Library_Management.Storage;
 
 namespace Library_Management.Services
 {
@@ -11,13 +12,14 @@ namespace Library_Management.Services
     public class BookService : IManageable<Book>
     {
         private List<Book> _books;
-
+       private FileStorage<Book> _storage;
         public BookService()
         {
-            _books = new List<Book>();
-        }
 
-        // --- CÁC HÀM TỪ INTERFACE IManageable<Book> ---
+
+            _storage = new FileStorage<Book>("data/books.json");
+            _books = _storage.Load();
+        }
 
         public void Add(Book item)
         {
@@ -27,22 +29,24 @@ namespace Library_Management.Services
                 return;
             }
             _books.Add(item);
+            _storage.Save(_books);
             Console.WriteLine($"Đã thêm sách: {item.Title}");
         }
 
         public void Remove(string id)
         {
-            Book target = FindById(id);
+            Book? target = FindById(id);
             if (target == null)
             {
                 Console.WriteLine($"Không tìm thấy sách với ID '{id}'.");
                 return;
             }
             _books.Remove(target);
+            _storage.Save(_books);
             Console.WriteLine($"Đã xóa sách: {target.Title}");
         }
 
-        public Book FindById(string id)
+        public Book? FindById(string id)
         {
             for (int i = 0; i < _books.Count; i++)
             {
@@ -65,13 +69,12 @@ namespace Library_Management.Services
                 {
                     _books[i] = updated;
                     Console.WriteLine($"Đã cập nhật sách: {updated.Title}");
+                    _storage.Save(_books);
                     return;
                 }
             }
             Console.WriteLine($"Không tìm thấy sách với ID '{updated.BookId}'.");
         }
-
-        // --- CÁC HÀM TÌM KIẾM RIÊNG THEO YÊU CẦU ---
 
         public List<Book> SearchByTitle(string keyword)
         {

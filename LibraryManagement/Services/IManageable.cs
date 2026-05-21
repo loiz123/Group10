@@ -15,8 +15,11 @@ namespace Library_Management.Services
         /// <summary>Xóa đối tượng khỏi danh sách dựa vào ID.</summary>
         void Remove(string id);
 
-        /// <summary>Tìm kiếm đối tượng dựa vào ID.</summary>
-        T FindById(string id);
+        /// <summary>
+        /// Tìm kiếm đối tượng dựa vào ID.
+        /// Trả về null nếu không tìm thấy.
+        /// </summary>
+        T? FindById(string id);
 
         /// <summary>Lấy toàn bộ danh sách đối tượng.</summary>
         List<T> GetAll();

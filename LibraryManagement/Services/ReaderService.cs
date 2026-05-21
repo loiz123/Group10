@@ -1,17 +1,23 @@
-﻿using Library_Management.Models;
+﻿using System;
+using System.Collections.Generic;
+using Library_Management.Models;
+using Library_Management.Storage;
+
 namespace Library_Management.Services
 {
     /// <summary>
     /// Quản lý danh sách bạn đọc trong bộ nhớ.
-    /// Nam Anh sẽ tích hợp FileStorage vào sau — không sửa file này khi chưa có review.
+    /// Nam Anh đã tích hợp FileStorage vào.
     /// </summary>
-    public class ReaderService
+    public class ReaderService: IManageable<Reader>
     {
         private List<Reader> _readers;
+        private FileStorage<Reader> _storage;
 
         public ReaderService()
         {
-            _readers = new List<Reader>();
+            _storage = new FileStorage<Reader>("data/readers.json");
+            _readers = _storage.Load();
         }
 
         /// <summary>Thêm bạn đọc mới. Báo lỗi nếu ID đã tồn tại.</summary>
@@ -23,24 +29,26 @@ namespace Library_Management.Services
                 return;
             }
             _readers.Add(reader);
+            _storage.Save(_readers); // Nam Anh: Lưu file sau khi thêm
             Console.WriteLine($"Đã thêm bạn đọc: {reader.Name}");
         }
 
         /// <summary>Xóa bạn đọc theo ID.</summary>
         public void Remove(string id)
         {
-            Reader target = FindById(id);
+            Reader? target = FindById(id);
             if (target == null)
             {
                 Console.WriteLine($"Không tìm thấy bạn đọc với ID '{id}'.");
                 return;
             }
             _readers.Remove(target);
+            _storage.Save(_readers); // Nam Anh: Lưu file sau khi xóa
             Console.WriteLine($"Đã xóa bạn đọc: {target.Name}");
         }
 
         /// <summary>Tìm bạn đọc theo ID. Trả về null nếu không có.</summary>
-        public Reader FindById(string id)
+        public Reader? FindById(string id)
         {
             for (int i = 0; i < _readers.Count; i++)
             {
@@ -64,6 +72,7 @@ namespace Library_Management.Services
                 if (_readers[i].Id == updated.Id)
                 {
                     _readers[i] = updated;
+                    _storage.Save(_readers); // Nam Anh: Lưu file sau khi cập nhật
                     Console.WriteLine($"Đã cập nhật bạn đọc: {updated.Name}");
                     return;
                 }

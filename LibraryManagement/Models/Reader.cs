@@ -32,6 +32,7 @@
         public int BorrowedCount
         {
             get { return _borrowedCount; }
+            private set { _borrowedCount = value; }
         }
 
         public string ReaderType
@@ -73,5 +74,7 @@
         {
             return "Reader";
         }
+        
+        
     }
 }
