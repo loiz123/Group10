@@ -1,4 +1,7 @@
-﻿namespace Library_Management.Models
+﻿using System.Text.Json.Serialization;
+using System;
+
+namespace Library_Management.Models
 {
     /// <summary>
     /// Đại diện bạn đọc thư viện. Kế thừa từ Person (Inheritance).
@@ -29,6 +32,7 @@
             }
         }
 
+        [JsonInclude]
         public int BorrowedCount
         {
             get { return _borrowedCount; }

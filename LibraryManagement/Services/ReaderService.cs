@@ -84,11 +84,20 @@ namespace Library_Management.Services
         public List<Reader> SearchByName(string keyword)
         {
             List<Reader> result = new List<Reader>();
+
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return result;
+            }
+
             for (int i = 0; i < _readers.Count; i++)
             {
                 if (_readers[i].Name.ToLower().Contains(keyword.ToLower()))
+                {
                     result.Add(_readers[i]);
+                }
             }
+
             return result;
         }
 
@@ -117,6 +126,10 @@ namespace Library_Management.Services
             {
                 Console.WriteLine($"{i + 1}. {_readers[i].GetInfo()}");
             }
+        }
+        public void SaveData()
+        {
+            _storage.Save(_readers);
         }
     }
 }

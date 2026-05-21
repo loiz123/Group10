@@ -17,7 +17,7 @@ namespace Library_Management.Storage
         {
             _filePath = filePath;
             // Đảm bảo thư mục "data/" tồn tại trước khi thao tác file
-            string directory = Path.GetDirectoryName(_filePath);
+            string? directory = Path.GetDirectoryName(_filePath);
             if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
@@ -87,7 +87,7 @@ namespace Library_Management.Storage
                     return new List<T>();
                 }
 
-                List<T> data = JsonSerializer.Deserialize<List<T>>(jsonString);
+                List<T>? data = JsonSerializer.Deserialize<List<T>>(jsonString);
                 if (data != null)
                 {
                     return data;

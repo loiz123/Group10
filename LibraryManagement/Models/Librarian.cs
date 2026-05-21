@@ -1,4 +1,6 @@
-﻿namespace Library_Management.Models
+﻿using System;
+
+namespace Library_Management.Models
 {
     /// <summary>
     /// Đại diện thủ thư. Kế thừa từ Person (Inheritance).

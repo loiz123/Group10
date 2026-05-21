@@ -23,7 +23,7 @@ namespace Library_Management
             _readerService = new ReaderService();
             _bookService = new BookService();
             _borrowService = new BorrowService(_readerService, _bookService);
-            _currentLibrarian = new Librarian("L001", "Admin Thủ Thư", "0900000000",
+            _currentLibrarian = new Librarian("L001", "Admin", "0900000000",
                 "admin@library.vn", "Thư viện", "NV001", "Quản lý", new DateTime(2020, 1, 1));
         }
 
@@ -55,13 +55,6 @@ namespace Library_Management
                         case "0":
                             isRunning = false;
                             Console.WriteLine("Đang đóng chương trình. Tạm biệt!");
-                            // Minh họa Polymorphism qua biến kiểu cha Person
-                            Person p1 = new Reader("R001", "Nguyen Van A", "0901", "a@a.com", "HCM", "SinhVien");
-                            Person p2 = new Librarian("L001", "Tran Thi B", "0902", "b@b.com", "HN", "NV001", "Quản lý", DateTime.Now);
-                            Console.WriteLine(p1.GetInfo());
-                            Console.WriteLine(p2.GetInfo());
-                            Console.WriteLine(p1.GetRole());
-                            Console.WriteLine(p2.GetRole());
                             break;
                         default:
                             Console.WriteLine("Lựa chọn không hợp lệ. Vui lòng nhập lại.");
@@ -179,7 +172,7 @@ namespace Library_Management
         {
             Console.Write("Nhập ID bạn đọc cần cập nhật: ");
             string id = Console.ReadLine();
-            Reader existing = _readerService.FindById(id);
+            Reader? existing = _readerService.FindById(id);
             if (existing == null)
             {
                 Console.WriteLine($"Không tìm thấy bạn đọc với ID '{id}'.");
@@ -192,18 +185,26 @@ namespace Library_Management
             Console.Write("SDT mới (Enter để giữ nguyên): ");
             string phone = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(phone)) phone = existing.Phone;
-            Console.Write("Loại bạn đọc mới (Enter để giữ nguyên): ");
+            Console.Write("Loại bạn đọc mới (Enter để   giữ nguyên): ");
             string type = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(type)) type = existing.ReaderType;
 
-            Reader updated = new Reader(id, name, phone, existing.Email, existing.Address, type, existing.MaxBorrow);
-            _readerService.Update(updated);
+            existing.Name = name;
+            existing.Phone = phone;
+            existing.ReaderType = type;
+
+            _readerService.Update(existing);
         }
 
         private void DeleteReader()
         {
             Console.Write("Nhập ID bạn đọc cần xóa: ");
             string id = Console.ReadLine();
+            if (_borrowService.IsReaderBorrowing(id))
+            {
+                Console.WriteLine("Không thể xóa bạn đọc vì đang có sách chưa trả.");
+                return;
+            }
             _readerService.Remove(id);
         }
 
@@ -224,6 +225,7 @@ namespace Library_Management
                 Console.WriteLine("5. Tìm sách theo thể loại");
                 Console.WriteLine("6. Xem sách còn có thể mượn");
                 Console.WriteLine("7. Xóa sách");
+                Console.WriteLine("8. Cập nhật sách");
                 Console.WriteLine("0. Quay lại");
                 Console.Write("Lựa chọn của bạn: ");
                 string choice = Console.ReadLine();
@@ -250,6 +252,9 @@ namespace Library_Management
                         break;
                     case "7":
                         DeleteBook();
+                        break;
+                    case "8":
+                        UpdateBook();
                         break;
                     case "0":
                         back = true;
@@ -322,7 +327,85 @@ namespace Library_Management
         {
             Console.Write("Nhập ID sách cần xóa: ");
             string id = Console.ReadLine();
+            if (_borrowService.IsBookBorrowing(id))
+            {
+                Console.WriteLine("Không thể xóa sách vì đang có phiếu mượn.");
+                return;
+            }
             _bookService.Remove(id);
+        }
+        private void UpdateBook()
+        {
+            Console.Write("Nhập ID sách cần cập nhật: ");
+            string id = Console.ReadLine();
+
+            Book? existing = _bookService.FindById(id);
+
+            if (existing == null)
+            {
+                Console.WriteLine("Không tìm thấy sách với ID '" + id + "'.");
+                return;
+            }
+
+            Console.WriteLine("Thông tin hiện tại: " + existing.GetInfo());
+
+            Console.Write("Tựa đề mới (Enter để giữ nguyên): ");
+            string title = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                title = existing.Title;
+            }
+
+            Console.Write("Tác giả mới (Enter để giữ nguyên): ");
+            string author = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(author))
+            {
+                author = existing.Author;
+            }
+
+            Console.Write("Thể loại mới (Enter để giữ nguyên): ");
+            string category = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                category = existing.Category;
+            }
+
+            Console.Write("Nhà xuất bản mới (Enter để giữ nguyên): ");
+            string publisher = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(publisher))
+            {
+                publisher = existing.Publisher;
+            }
+
+            Console.Write("Tổng số lượng mới (Enter để giữ nguyên): ");
+            string totalInput = Console.ReadLine();
+
+            int newTotalQuantity = existing.TotalQuantity;
+            int borrowedCount = existing.TotalQuantity - existing.AvailableQuantity;
+
+            if (!string.IsNullOrWhiteSpace(totalInput))
+            {
+                if (!int.TryParse(totalInput, out newTotalQuantity) || newTotalQuantity <= 0)
+                {
+                    Console.WriteLine("Tổng số lượng không hợp lệ.");
+                    return;
+                }
+
+                if (newTotalQuantity < borrowedCount)
+                {
+                    Console.WriteLine("Không thể cập nhật tổng số lượng nhỏ hơn số sách đang được mượn.");
+                    return;
+                }
+            }
+
+            existing.Title = title;
+            existing.Author = author;
+            existing.Category = category;
+            existing.Publisher = publisher;
+            existing.TotalQuantity = newTotalQuantity;
+            existing.AvailableQuantity = newTotalQuantity - borrowedCount;
+
+            _bookService.Update(existing);
         }
 
         // =====================================================================

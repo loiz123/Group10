@@ -13,6 +13,14 @@ namespace Library_Management.Models
         private double _amount;
         private bool _isPaid;
 
+        public Fine()
+        {
+            _fineId = Guid.NewGuid().ToString();
+            _borrowRecord = null!;
+            _amount = 0;
+            _isPaid = false;
+        }
+
         public Fine(BorrowRecord borrowRecord)
         {
             _fineId = Guid.NewGuid().ToString();
