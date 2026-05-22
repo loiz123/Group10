@@ -41,11 +41,18 @@ namespace Library_Management.Services
         public BorrowRecord? FindById(string id)
         {
             for (int i = 0; i < _records.Count; i++)
-                if (_records[i].RecordId == id) return _records[i];
+            {
+                if (_records[i].RecordId == id)
+                    return _records[i];
+            }
             return null;
         }
 
-        public List<BorrowRecord> GetAll() => _records;
+        // Fix 3: Không dùng expression body (=>), khai báo tường minh
+        public List<BorrowRecord> GetAll()
+        {
+            return _records;
+        }
 
         public void Update(BorrowRecord item)
         {
@@ -65,9 +72,30 @@ namespace Library_Management.Services
             Reader? reader = _readerService.FindById(readerId);
             Book? book = _bookService.FindById(bookId);
 
-            if (reader == null || book == null) { Console.WriteLine("Không tìm thấy Reader hoặc Book"); return; }
-            if (!reader.CanBorrow()) { Console.WriteLine("Reader đã đạt giới hạn mượn"); return; }
-            if (!book.IsAvailable()) { Console.WriteLine("Sách đã hết"); return; }
+            if (reader == null || book == null)
+            {
+                Console.WriteLine("Không tìm thấy Reader hoặc Book");
+                return;
+            }
+
+            if (librarian == null)
+            {
+                Console.WriteLine("Không tìm thấy thủ thư xử lý");
+                return;
+            }
+
+            if (!book.IsAvailable())
+            {
+                Console.WriteLine("Sách đã hết");
+                return;
+            }
+
+            // Fix 4: Dùng librarian.ApproveBorrow() thay vì tự kiểm tra reader.CanBorrow()
+            // Thể hiện đúng vai trò của Librarian trong nghiệp vụ
+            if (!librarian.ApproveBorrow(reader))
+            {
+                return;
+            }
 
             BorrowRecord record = new BorrowRecord
             {
@@ -90,7 +118,11 @@ namespace Library_Management.Services
         public void ReturnBook(string recordId)
         {
             BorrowRecord? record = FindById(recordId);
-            if (record == null) { Console.WriteLine("Không tìm thấy phiếu mượn"); return; }
+            if (record == null)
+            {
+                Console.WriteLine("Không tìm thấy phiếu mượn");
+                return;
+            }
 
             if (record.Status != BorrowStatus.Borrowing)
             {
@@ -98,14 +130,31 @@ namespace Library_Management.Services
                 return;
             }
 
+            // Fix 1: Lấy Book và Reader thật từ service thay vì dùng object trong record
+            // Tránh trường hợp object trong JSON không đồng bộ với dữ liệu thật
+            Book? currentBook = _bookService.FindById(record.Book.BookId);
+            Reader? currentReader = _readerService.FindById(record.Reader.Id);
+
+            if (currentBook == null || currentReader == null)
+            {
+                Console.WriteLine("Không tìm thấy sách hoặc bạn đọc trong dữ liệu hiện tại.");
+                return;
+            }
+
+            record.Librarian.ApproveReturn(currentReader);
+
             bool wasOverdue = record.IsOverdue();
 
             // Gọi CompleteReturn TRƯỚC để set ReturnDate
-            // sau đó Fine.Calculate() mới tính đúng số ngày trễ
+            // Khi Fine.Calculate() chạy, GetOverdueDays() sẽ dùng ReturnDate thay vì DateTime.Now
             record.CompleteReturn();
 
-            record.Book.Return();
-            record.Reader.DecreaseBorrowCount();
+            currentBook.Return();
+            currentReader.DecreaseBorrowCount();
+
+            // Cập nhật lại reference trong record về object thật
+            record.Book = currentBook;
+            record.Reader = currentReader;
 
             if (wasOverdue)
             {
@@ -113,8 +162,9 @@ namespace Library_Management.Services
                 fine.Calculate();
                 _fines.Add(fine);
                 _fineStorage.Save(_fines);
-                record.Status = BorrowStatus.Overdue;
-                Console.WriteLine("Sách trả quá hạn. Tiền phạt: " + fine.Amount);
+                // Fix 2: Không set lại Status = Overdue sau CompleteReturn
+                // Việc quá hạn đã được thể hiện qua Fine, status giữ là Returned
+                Console.WriteLine("Sách trả quá hạn. Tiền phạt: " + fine.Amount + " VNĐ");
             }
 
             _bookService.SaveData();
@@ -123,31 +173,14 @@ namespace Library_Management.Services
             Console.WriteLine("Trả sách thành công");
         }
 
-        public bool IsBookBorrowing(string bookId)
-        {
-            foreach (BorrowRecord record in _records)
-            {
-                if (record.Book.BookId == bookId && record.Status == BorrowStatus.Borrowing)
-                    return true;
-            }
-            return false;
-        }
-
-        public bool IsReaderBorrowing(string readerId)
-        {
-            foreach (BorrowRecord record in _records)
-            {
-                if (record.Reader.Id == readerId && record.Status == BorrowStatus.Borrowing)
-                    return true;
-            }
-            return false;
-        }
-
         public List<BorrowRecord> GetOverdueRecords()
         {
             List<BorrowRecord> result = new List<BorrowRecord>();
             for (int i = 0; i < _records.Count; i++)
-                if (_records[i].IsOverdue()) result.Add(_records[i]);
+            {
+                if (_records[i].IsOverdue())
+                    result.Add(_records[i]);
+            }
             return result;
         }
 
@@ -155,7 +188,10 @@ namespace Library_Management.Services
         {
             List<Fine> result = new List<Fine>();
             for (int i = 0; i < _fines.Count; i++)
-                if (!_fines[i].IsPaid) result.Add(_fines[i]);
+            {
+                if (!_fines[i].IsPaid)
+                    result.Add(_fines[i]);
+            }
             return result;
         }
 
@@ -165,8 +201,33 @@ namespace Library_Management.Services
                 throw new ArgumentException("readerId không hợp lệ");
             List<BorrowRecord> result = new List<BorrowRecord>();
             for (int i = 0; i < _records.Count; i++)
-                if (_records[i].Reader.Id == readerId) result.Add(_records[i]);
+            {
+                if (_records[i].Reader.Id == readerId)
+                    result.Add(_records[i]);
+            }
             return result;
+        }
+
+        public bool IsBookBorrowing(string bookId)
+        {
+            for (int i = 0; i < _records.Count; i++)
+            {
+                if (_records[i].Book.BookId == bookId &&
+                    _records[i].Status == BorrowStatus.Borrowing)
+                    return true;
+            }
+            return false;
+        }
+
+        public bool IsReaderBorrowing(string readerId)
+        {
+            for (int i = 0; i < _records.Count; i++)
+            {
+                if (_records[i].Reader.Id == readerId &&
+                    _records[i].Status == BorrowStatus.Borrowing)
+                    return true;
+            }
+            return false;
         }
     }
 }
