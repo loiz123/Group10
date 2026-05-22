@@ -1,4 +1,6 @@
-﻿namespace Library_Management.Models
+﻿using System;
+
+namespace Library_Management.Models
 {
     /// <summary>
     /// Abstract base class đại diện cho một người dùng hệ thống thư viện.

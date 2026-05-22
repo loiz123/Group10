@@ -8,17 +8,17 @@ namespace Library_Management.Models
     public class BorrowRecord
     {
        // ===== PRIVATE FIELDS =====
-private string _recordId;
+        private string _recordId;
 
-private Reader _reader = null!;
-private Book _book = null!;
-private Librarian _librarian = null!;
+        private Reader _reader = null!;
+        private Book _book = null!;
+        private Librarian _librarian = null!;
 
-private DateTime _borrowDate;
-private DateTime _dueDate;
-private DateTime? _returnDate;
+        private DateTime _borrowDate;
+        private DateTime _dueDate;
+        private DateTime? _returnDate;
 
-private BorrowStatus _status;
+        private BorrowStatus _status;
         // ===== CONSTRUCTOR (giữ để không lỗi BorrowService) =====
         public BorrowRecord()
         {
@@ -99,8 +99,23 @@ private BorrowStatus _status;
 
         public int GetOverdueDays()
         {
-            if (!IsOverdue()) return 0;
-            return (DateTime.Now - _dueDate).Days;
+            DateTime checkDate;
+
+            if (_returnDate.HasValue)
+            {
+                checkDate = _returnDate.Value;
+            }
+            else
+            {
+                checkDate = DateTime.Now;
+            }
+
+            if (checkDate <= _dueDate)
+            {
+                return 0;
+            }
+
+            return (checkDate.Date - _dueDate.Date).Days;
         }
 
         public void CompleteReturn()
