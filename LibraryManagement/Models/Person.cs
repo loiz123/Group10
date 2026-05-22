@@ -24,6 +24,10 @@ namespace Library_Management.Models
             _email = email;
             _address = address;
         }
+        protected Person()
+        {
+            _id = ""; _name = ""; _phone = ""; _email = ""; _address = "";
+        }
 
         // Properties với validation cơ bản
         public string Id

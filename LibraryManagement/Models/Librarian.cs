@@ -19,7 +19,12 @@ namespace Library_Management.Models
             _department = department;
             _hireDate = hireDate;
         }
-
+        public Librarian() : base()
+        {
+            _staffCode = "";
+            _department = "";
+            _hireDate = DateTime.MinValue;
+        }
         public string StaffCode
         {
             get { return _staffCode; }

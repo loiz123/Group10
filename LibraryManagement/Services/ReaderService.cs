@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Library_Management.Models;
 using Library_Management.Storage;
@@ -7,9 +7,8 @@ namespace Library_Management.Services
 {
     /// <summary>
     /// Quản lý danh sách bạn đọc trong bộ nhớ.
-    /// Nam Anh đã tích hợp FileStorage vào.
     /// </summary>
-    public class ReaderService: IManageable<Reader>
+    public class ReaderService : IManageable<Reader>
     {
         private List<Reader> _readers;
         private FileStorage<Reader> _storage;
@@ -29,7 +28,7 @@ namespace Library_Management.Services
                 return;
             }
             _readers.Add(reader);
-            _storage.Save(_readers); // Nam Anh: Lưu file sau khi thêm
+            _storage.Save(_readers);
             Console.WriteLine($"Đã thêm bạn đọc: {reader.Name}");
         }
 
@@ -43,7 +42,7 @@ namespace Library_Management.Services
                 return;
             }
             _readers.Remove(target);
-            _storage.Save(_readers); // Nam Anh: Lưu file sau khi xóa
+            _storage.Save(_readers);
             Console.WriteLine($"Đã xóa bạn đọc: {target.Name}");
         }
 
@@ -72,7 +71,7 @@ namespace Library_Management.Services
                 if (_readers[i].Id == updated.Id)
                 {
                     _readers[i] = updated;
-                    _storage.Save(_readers); // Nam Anh: Lưu file sau khi cập nhật
+                    _storage.Save(_readers);
                     Console.WriteLine($"Đã cập nhật bạn đọc: {updated.Name}");
                     return;
                 }
@@ -84,20 +83,12 @@ namespace Library_Management.Services
         public List<Reader> SearchByName(string keyword)
         {
             List<Reader> result = new List<Reader>();
-
-            if (string.IsNullOrWhiteSpace(keyword))
-            {
-                return result;
-            }
-
+            if (string.IsNullOrWhiteSpace(keyword)) return result;
             for (int i = 0; i < _readers.Count; i++)
             {
                 if (_readers[i].Name.ToLower().Contains(keyword.ToLower()))
-                {
                     result.Add(_readers[i]);
-                }
             }
-
             return result;
         }
 
@@ -127,6 +118,8 @@ namespace Library_Management.Services
                 Console.WriteLine($"{i + 1}. {_readers[i].GetInfo()}");
             }
         }
+
+        /// <summary>Lưu dữ liệu bạn đọc xuống file.</summary>
         public void SaveData()
         {
             _storage.Save(_readers);

@@ -20,7 +20,12 @@ namespace Library_Management.Models
             _maxBorrow = maxBorrow;
             _borrowedCount = 0;
         }
-
+        public Reader() : base()
+        {
+            _readerType = "";
+            _maxBorrow = 3;
+            _borrowedCount = 0;
+        }
         public int MaxBorrow
         {
             get { return _maxBorrow; }

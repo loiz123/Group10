@@ -7,19 +7,17 @@ namespace Library_Management.Models
     /// </summary>
     public class BorrowRecord
     {
-       // ===== PRIVATE FIELDS =====
+        // ===== PRIVATE FIELDS =====
         private string _recordId;
-
         private Reader _reader = null!;
         private Book _book = null!;
         private Librarian _librarian = null!;
-
         private DateTime _borrowDate;
         private DateTime _dueDate;
         private DateTime? _returnDate;
-
         private BorrowStatus _status;
-        // ===== CONSTRUCTOR (giữ để không lỗi BorrowService) =====
+
+        // ===== CONSTRUCTOR =====
         public BorrowRecord()
         {
             _recordId = Guid.NewGuid().ToString();
@@ -99,22 +97,9 @@ namespace Library_Management.Models
 
         public int GetOverdueDays()
         {
-            DateTime checkDate;
-
-            if (_returnDate.HasValue)
-            {
-                checkDate = _returnDate.Value;
-            }
-            else
-            {
-                checkDate = DateTime.Now;
-            }
-
-            if (checkDate <= _dueDate)
-            {
-                return 0;
-            }
-
+            // Dùng ReturnDate nếu đã trả, ngược lại dùng DateTime.Now
+            DateTime checkDate = _returnDate.HasValue ? _returnDate.Value : DateTime.Now;
+            if (checkDate <= _dueDate) return 0;
             return (checkDate.Date - _dueDate.Date).Days;
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Library_Management.Models;
 using Library_Management.Storage;
@@ -7,12 +7,12 @@ namespace Library_Management.Services
 {
     /// <summary>
     /// Service quản lý sách, implement IManageable<Book> (Polymorphism).
-    /// Nam Anh sẽ tích hợp FileStorage<Book> vào sau.
     /// </summary>
     public class BookService : IManageable<Book>
     {
         private List<Book> _books;
-       private FileStorage<Book> _storage;
+        private FileStorage<Book> _storage;
+
         public BookService()
         {
             _storage = new FileStorage<Book>("data/books.json");
@@ -77,60 +77,36 @@ namespace Library_Management.Services
         public List<Book> SearchByTitle(string keyword)
         {
             List<Book> result = new List<Book>();
-
-            if (string.IsNullOrWhiteSpace(keyword))
-            {
-                return result;
-            }
-
+            if (string.IsNullOrWhiteSpace(keyword)) return result;
             for (int i = 0; i < _books.Count; i++)
             {
                 if (_books[i].Title.ToLower().Contains(keyword.ToLower()))
-                {
                     result.Add(_books[i]);
-                }
             }
-
             return result;
         }
 
         public List<Book> SearchByAuthor(string keyword)
         {
             List<Book> result = new List<Book>();
-
-            if (string.IsNullOrWhiteSpace(keyword))
-            {
-                return result;
-            }
-
+            if (string.IsNullOrWhiteSpace(keyword)) return result;
             for (int i = 0; i < _books.Count; i++)
             {
                 if (_books[i].Author.ToLower().Contains(keyword.ToLower()))
-                {
                     result.Add(_books[i]);
-                }
             }
-
             return result;
         }
 
         public List<Book> SearchByCategory(string keyword)
         {
             List<Book> result = new List<Book>();
-
-            if (string.IsNullOrWhiteSpace(keyword))
-            {
-                return result;
-            }
-
+            if (string.IsNullOrWhiteSpace(keyword)) return result;
             for (int i = 0; i < _books.Count; i++)
             {
                 if (_books[i].Category.ToLower().Contains(keyword.ToLower()))
-                {
                     result.Add(_books[i]);
-                }
             }
-
             return result;
         }
 
@@ -144,6 +120,7 @@ namespace Library_Management.Services
             }
             return result;
         }
+
         public void SaveData()
         {
             _storage.Save(_books);

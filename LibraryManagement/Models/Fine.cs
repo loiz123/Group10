@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using Library_Management.Models;
 
 namespace Library_Management.Models
@@ -13,6 +14,7 @@ namespace Library_Management.Models
         private double _amount;
         private bool _isPaid;
 
+        // Constructor rỗng cho JSON deserialization
         public Fine()
         {
             _fineId = Guid.NewGuid().ToString();
@@ -24,10 +26,8 @@ namespace Library_Management.Models
         public Fine(BorrowRecord borrowRecord)
         {
             _fineId = Guid.NewGuid().ToString();
-
             _borrowRecord = borrowRecord
                 ?? throw new ArgumentNullException(nameof(borrowRecord));
-
             _amount = 0;
             _isPaid = false;
         }
@@ -39,15 +39,12 @@ namespace Library_Management.Models
             set { _fineId = value; }
         }
 
+        // Bỏ null check để JSON deserialization hoạt động đúng
+        [JsonInclude]
         public BorrowRecord BorrowRecord
         {
             get { return _borrowRecord; }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(BorrowRecord));
-                _borrowRecord = value;
-            }
+            set { _borrowRecord = value; }
         }
 
         public double Amount
@@ -61,6 +58,7 @@ namespace Library_Management.Models
             get { return _isPaid; }
             set { _isPaid = value; }
         }
+
         // ===== Logic =====
         public void Calculate()
         {
@@ -77,11 +75,8 @@ namespace Library_Management.Models
 
             _amount = daysLate * 5000;
 
-            // chống tiền âm (safe guard)
             if (_amount < 0)
-            {
                 _amount = 0;
-            }
         }
 
         public void MarkAsPaid()
