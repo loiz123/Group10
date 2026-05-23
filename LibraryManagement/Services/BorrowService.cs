@@ -48,7 +48,7 @@ namespace Library_Management.Services
             return null;
         }
 
-        // Fix 3: Không dùng expression body (=>), khai báo tường minh
+    
         public List<BorrowRecord> GetAll()
         {
             return _records;
@@ -90,8 +90,7 @@ namespace Library_Management.Services
                 return;
             }
 
-            // Fix 4: Dùng librarian.ApproveBorrow() thay vì tự kiểm tra reader.CanBorrow()
-            // Thể hiện đúng vai trò của Librarian trong nghiệp vụ
+          
             if (!librarian.ApproveBorrow(reader))
             {
                 return;
@@ -130,8 +129,6 @@ namespace Library_Management.Services
                 return;
             }
 
-            // Fix 1: Lấy Book và Reader thật từ service thay vì dùng object trong record
-            // Tránh trường hợp object trong JSON không đồng bộ với dữ liệu thật
             Book? currentBook = _bookService.FindById(record.Book.BookId);
             Reader? currentReader = _readerService.FindById(record.Reader.Id);
 
@@ -162,8 +159,7 @@ namespace Library_Management.Services
                 fine.Calculate();
                 _fines.Add(fine);
                 _fineStorage.Save(_fines);
-                // Fix 2: Không set lại Status = Overdue sau CompleteReturn
-                // Việc quá hạn đã được thể hiện qua Fine, status giữ là Returned
+             
                 Console.WriteLine("Sách trả quá hạn. Tiền phạt: " + fine.Amount + " VNĐ");
             }
 
