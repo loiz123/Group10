@@ -471,10 +471,35 @@ namespace Library_Management
         private void ReturnBook()
         {
             Console.WriteLine("\n[TRẢ SÁCH]");
-            Console.Write("Nhập ID phiếu mượn (RecordId): ");
-            string recordId = Console.ReadLine();
+            Console.Write("Nhập ID bạn đọc: ");
+            string readerId = Console.ReadLine();
+
+            List<BorrowRecord> borrowing = _borrowService.GetBorrowingRecordsByReader(readerId);
+
+            if (borrowing.Count == 0)
+            {
+                Console.WriteLine("Bạn đọc này không có sách nào đang mượn.");
+                return;
+            }
+
+            Console.WriteLine("Danh sách sách đang mượn:");
+            for (int i = 0; i < borrowing.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {borrowing[i].GetInfo()}");
+            }
+
+            Console.Write("Chọn số thứ tự sách cần trả: ");
+            if (!int.TryParse(Console.ReadLine(), out int choice) ||
+                choice < 1 || choice > borrowing.Count)
+            {
+                Console.WriteLine("Lựa chọn không hợp lệ.");
+                return;
+            }
+
+            string recordId = borrowing[choice - 1].RecordId;
             _borrowService.ReturnBook(recordId);
         }
+
 
         private void ViewRecordsByReader()
         {

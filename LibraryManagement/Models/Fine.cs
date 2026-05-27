@@ -1,16 +1,18 @@
 using System;
-using System.Text.Json.Serialization;
-using Library_Management.Models;
 
 namespace Library_Management.Models
 {
     /// <summary>
-    /// Phiếu phạt khi trả sách trễ
+    /// Phiếu phạt khi trả sách trễ.
+    /// Chỉ lưu RecordId thay vì toàn bộ BorrowRecord để tránh trùng lặp dữ liệu.
     /// </summary>
     public class Fine
     {
         private string _fineId;
-        private BorrowRecord _borrowRecord;
+        private string _recordId;       
+        private string _readerName;     
+        private string _bookTitle;      
+        private int _overdueDays;       
         private double _amount;
         private bool _isPaid;
 
@@ -18,33 +20,58 @@ namespace Library_Management.Models
         public Fine()
         {
             _fineId = Guid.NewGuid().ToString();
-            _borrowRecord = null!;
+            _recordId = "";
+            _readerName = "";
+            _bookTitle = "";
+            _overdueDays = 0;
             _amount = 0;
             _isPaid = false;
         }
 
-        public Fine(BorrowRecord borrowRecord)
+        // Constructor dùng khi tạo phiếu phạt mới
+        public Fine(BorrowRecord record)
         {
+            if (record == null)
+                throw new ArgumentNullException(nameof(record));
+
             _fineId = Guid.NewGuid().ToString();
-            _borrowRecord = borrowRecord
-                ?? throw new ArgumentNullException(nameof(borrowRecord));
+            _recordId = record.RecordId;
+            _readerName = record.ReaderName;
+            _bookTitle = record.BookTitle;
+            _overdueDays = record.GetOverdueDays();
             _amount = 0;
             _isPaid = false;
         }
 
-        // ===== Properties =====
+        // ===== PROPERTIES =====
         public string FineId
         {
             get { return _fineId; }
             set { _fineId = value; }
         }
 
-        // Bỏ null check để JSON deserialization hoạt động đúng
-        [JsonInclude]
-        public BorrowRecord BorrowRecord
+        public string RecordId
         {
-            get { return _borrowRecord; }
-            set { _borrowRecord = value; }
+            get { return _recordId; }
+            set { _recordId = value; }
+        }
+
+        public string ReaderName
+        {
+            get { return _readerName; }
+            set { _readerName = value; }
+        }
+
+        public string BookTitle
+        {
+            get { return _bookTitle; }
+            set { _bookTitle = value; }
+        }
+
+        public int OverdueDays
+        {
+            get { return _overdueDays; }
+            set { _overdueDays = value; }
         }
 
         public double Amount
@@ -59,24 +86,16 @@ namespace Library_Management.Models
             set { _isPaid = value; }
         }
 
-        // ===== Logic =====
+        // ===== METHODS =====
+
         public void Calculate()
         {
-            if (_borrowRecord == null)
-                throw new InvalidOperationException("BorrowRecord không tồn tại.");
-
-            int daysLate = _borrowRecord.GetOverdueDays();
-
-            if (daysLate <= 0)
+            if (_overdueDays <= 0)
             {
                 _amount = 0;
                 return;
             }
-
-            _amount = daysLate * 5000;
-
-            if (_amount < 0)
-                _amount = 0;
+            _amount = _overdueDays * 5000;
         }
 
         public void MarkAsPaid()
@@ -84,9 +103,11 @@ namespace Library_Management.Models
             _isPaid = true;
         }
 
+        
         public string GetInfo()
         {
-            return $"FineId: {_fineId} | Amount: {_amount} | Paid: {_isPaid}";
+            return $"FineId: {_fineId} | Sách: {_bookTitle} | Bạn đọc: {_readerName} " +
+                   $"| Số ngày trễ: {_overdueDays} | Tiền phạt: {_amount} VNĐ | Đã thanh toán: {_isPaid}";
         }
     }
 }

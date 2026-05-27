@@ -7,8 +7,8 @@ namespace Library_Management.Services
 {
     public class BorrowService : IManageable<BorrowRecord>
     {
-        private List<BorrowRecord> _records = new List<BorrowRecord>();
-        private List<Fine> _fines = new List<Fine>();
+        private List<BorrowRecord> _records;
+        private List<Fine> _fines;
         private FileStorage<BorrowRecord> _storage;
         private FileStorage<Fine> _fineStorage;
         private ReaderService _readerService;
@@ -48,7 +48,6 @@ namespace Library_Management.Services
             return null;
         }
 
-    
         public List<BorrowRecord> GetAll()
         {
             return _records;
@@ -67,6 +66,7 @@ namespace Library_Management.Services
             }
         }
 
+        // LỖI 1 ĐÃ FIX: BorrowRecord chỉ lưu ID, không lưu object lồng nhau
         public void BorrowBook(string readerId, string bookId, Librarian librarian)
         {
             Reader? reader = _readerService.FindById(readerId);
@@ -74,52 +74,55 @@ namespace Library_Management.Services
 
             if (reader == null || book == null)
             {
-                Console.WriteLine("Không tìm thấy Reader hoặc Book");
+                Console.WriteLine("Không tìm thấy bạn đọc hoặc sách.");
                 return;
             }
 
             if (librarian == null)
             {
-                Console.WriteLine("Không tìm thấy thủ thư xử lý");
+                Console.WriteLine("Không tìm thấy thủ thư xử lý.");
                 return;
             }
 
             if (!book.IsAvailable())
             {
-                Console.WriteLine("Sách đã hết");
+                Console.WriteLine("Sách hiện không còn để mượn.");
                 return;
             }
 
-          
             if (!librarian.ApproveBorrow(reader))
             {
                 return;
             }
 
-            BorrowRecord record = new BorrowRecord
-            {
-                Reader = reader,
-                Book = book,
-                Librarian = librarian,
-                BorrowDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(7)
-            };
+            // Tạo phiếu mượn chỉ với ID + tên để hiển thị
+            BorrowRecord record = new BorrowRecord();
+            record.ReaderId = reader.Id;
+            record.BookId = book.BookId;
+            record.LibrarianId = librarian.Id;
+            record.ReaderName = reader.Name;
+            record.BookTitle = book.Title;
+            record.BorrowDate = DateTime.Now;
+            record.DueDate = DateTime.Now.AddDays(7);
 
             book.Checkout();
             reader.IncreaseBorrowCount();
+
             _records.Add(record);
             _bookService.SaveData();
             _readerService.SaveData();
             _storage.Save(_records);
-            Console.WriteLine("Mượn sách thành công");
+
+            Console.WriteLine("Mượn sách thành công.");
         }
 
+        // LỖI 1 ĐÃ FIX: lookup lại Reader và Book qua Service thay vì dùng object trong record
         public void ReturnBook(string recordId)
         {
             BorrowRecord? record = FindById(recordId);
             if (record == null)
             {
-                Console.WriteLine("Không tìm thấy phiếu mượn");
+                Console.WriteLine("Không tìm thấy phiếu mượn.");
                 return;
             }
 
@@ -129,42 +132,37 @@ namespace Library_Management.Services
                 return;
             }
 
-            Book? currentBook = _bookService.FindById(record.Book.BookId);
-            Reader? currentReader = _readerService.FindById(record.Reader.Id);
+            // Lookup qua Service để lấy đúng instance đang dùng
+            Reader? reader = _readerService.FindById(record.ReaderId);
+            Book? book = _bookService.FindById(record.BookId);
 
-            if (currentBook == null || currentReader == null)
+            if (reader == null || book == null)
             {
                 Console.WriteLine("Không tìm thấy sách hoặc bạn đọc trong dữ liệu hiện tại.");
                 return;
             }
 
-            record.Librarian.ApproveReturn(currentReader);
-
             bool wasOverdue = record.IsOverdue();
 
-            
             record.CompleteReturn();
+            book.Return();
+            reader.DecreaseBorrowCount();
 
-            currentBook.Return();
-            currentReader.DecreaseBorrowCount();
-
-            record.Book = currentBook;
-            record.Reader = currentReader;
-
+            // LỖI 2 ĐÃ FIX: Fine chỉ nhận BorrowRecord (đã có ReaderName, BookTitle sẵn)
             if (wasOverdue)
             {
                 Fine fine = new Fine(record);
                 fine.Calculate();
                 _fines.Add(fine);
                 _fineStorage.Save(_fines);
-             
                 Console.WriteLine("Sách trả quá hạn. Tiền phạt: " + fine.Amount + " VNĐ");
             }
 
             _bookService.SaveData();
             _readerService.SaveData();
             _storage.Save(_records);
-            Console.WriteLine("Trả sách thành công");
+
+            Console.WriteLine("Trả sách thành công.");
         }
 
         public List<BorrowRecord> GetOverdueRecords()
@@ -192,11 +190,24 @@ namespace Library_Management.Services
         public List<BorrowRecord> GetRecordsByReader(string readerId)
         {
             if (string.IsNullOrWhiteSpace(readerId))
-                throw new ArgumentException("readerId không hợp lệ");
+                throw new ArgumentException("readerId không hợp lệ.");
             List<BorrowRecord> result = new List<BorrowRecord>();
             for (int i = 0; i < _records.Count; i++)
             {
-                if (_records[i].Reader.Id == readerId)
+                if (_records[i].ReaderId == readerId)
+                    result.Add(_records[i]);
+            }
+            return result;
+        }
+
+        // Lấy phiếu đang mượn của một bạn đọc (dùng cho UX trả sách)
+        public List<BorrowRecord> GetBorrowingRecordsByReader(string readerId)
+        {
+            List<BorrowRecord> result = new List<BorrowRecord>();
+            for (int i = 0; i < _records.Count; i++)
+            {
+                if (_records[i].ReaderId == readerId &&
+                    _records[i].Status == BorrowStatus.Borrowing)
                     result.Add(_records[i]);
             }
             return result;
@@ -206,7 +217,7 @@ namespace Library_Management.Services
         {
             for (int i = 0; i < _records.Count; i++)
             {
-                if (_records[i].Book.BookId == bookId &&
+                if (_records[i].BookId == bookId &&
                     _records[i].Status == BorrowStatus.Borrowing)
                     return true;
             }
@@ -217,7 +228,7 @@ namespace Library_Management.Services
         {
             for (int i = 0; i < _records.Count; i++)
             {
-                if (_records[i].Reader.Id == readerId &&
+                if (_records[i].ReaderId == readerId &&
                     _records[i].Status == BorrowStatus.Borrowing)
                     return true;
             }
