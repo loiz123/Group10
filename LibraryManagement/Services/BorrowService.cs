@@ -142,14 +142,12 @@ namespace Library_Management.Services
 
             bool wasOverdue = record.IsOverdue();
 
-            // Gọi CompleteReturn TRƯỚC để set ReturnDate
-            // Khi Fine.Calculate() chạy, GetOverdueDays() sẽ dùng ReturnDate thay vì DateTime.Now
+            
             record.CompleteReturn();
 
             currentBook.Return();
             currentReader.DecreaseBorrowCount();
 
-            // Cập nhật lại reference trong record về object thật
             record.Book = currentBook;
             record.Reader = currentReader;
 
