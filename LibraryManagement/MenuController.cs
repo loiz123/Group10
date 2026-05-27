@@ -134,23 +134,50 @@ namespace Library_Management
         private void AddReader()
         {
             Console.WriteLine("\n[THÊM BẠN ĐỌC MỚI]");
+
             Console.Write("Nhập ID: ");
             string id = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                Console.WriteLine("ID không được để trống.");
+                return;
+            }
+
             Console.Write("Nhập Tên: ");
             string name = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                Console.WriteLine("Tên không được để trống.");
+                return;
+            }
+
             Console.Write("Nhập SDT: ");
             string phone = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                Console.WriteLine("Số điện thoại không được để trống.");
+                return;
+            }
+
             Console.Write("Nhập Email (Enter để bỏ qua): ");
             string email = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(email)) email = "N/A";
+
             Console.Write("Nhập Địa chỉ (Enter để bỏ qua): ");
             string address = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(address)) address = "N/A";
+
             Console.Write("Loại bạn đọc (SinhVien/GiangVien): ");
             string type = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                Console.WriteLine("Loại bạn đọc không được để trống.");
+                return;
+            }
 
             Reader newReader = new Reader(id, name, phone, email, address, type, 3);
             _readerService.Add(newReader);
+            Console.WriteLine("Thêm bạn đọc thành công.");
         }
 
         private void SearchReader()
@@ -281,27 +308,54 @@ namespace Library_Management
         private void AddBook()
         {
             Console.WriteLine("\n[THÊM SÁCH MỚI]");
+
             Console.Write("Nhập ID sách: ");
             string id = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                Console.WriteLine("ID không được để trống.");
+                return;
+            }
+
             Console.Write("Nhập Tựa đề: ");
             string title = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                Console.WriteLine("Tựa đề không được để trống.");
+                return;
+            }
+
             Console.Write("Nhập Tác giả: ");
             string author = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(author))
+            {
+                Console.WriteLine("Tác giả không được để trống.");
+                return;
+            }
+
             Console.Write("Nhập Thể loại: ");
             string category = Console.ReadLine();
-            Console.Write("Nhập Nhà xuất bản: ");
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                Console.WriteLine("Thể loại không được để trống.");
+                return;
+            }
+
+            Console.Write("Nhập Nhà xuất bản (Enter để bỏ qua): ");
             string publisher = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(publisher)) publisher = "N/A";
+
             Console.Write("Nhập Số lượng: ");
             if (!int.TryParse(Console.ReadLine(), out int qty) || qty <= 0)
             {
-                Console.WriteLine("Số lượng không hợp lệ.");
+                Console.WriteLine("Số lượng không hợp lệ, phải là số nguyên dương.");
                 return;
             }
 
             Book newBook = new Book(id, title, author, category, publisher, qty);
             _bookService.Add(newBook);
+            Console.WriteLine("Thêm sách thành công.");
         }
-
         private void SearchBookByTitle()
         {
             Console.Write("Nhập tên sách cần tìm: ");
