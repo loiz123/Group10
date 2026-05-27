@@ -66,7 +66,7 @@ namespace Library_Management.Services
             }
         }
 
-        // LỖI 1 ĐÃ FIX: BorrowRecord chỉ lưu ID, không lưu object lồng nhau
+    
         public void BorrowBook(string readerId, string bookId, Librarian librarian)
         {
             Reader? reader = _readerService.FindById(readerId);
@@ -116,7 +116,7 @@ namespace Library_Management.Services
             Console.WriteLine("Mượn sách thành công.");
         }
 
-        // LỖI 1 ĐÃ FIX: lookup lại Reader và Book qua Service thay vì dùng object trong record
+        
         public void ReturnBook(string recordId)
         {
             BorrowRecord? record = FindById(recordId);
@@ -148,7 +148,6 @@ namespace Library_Management.Services
             book.Return();
             reader.DecreaseBorrowCount();
 
-            // LỖI 2 ĐÃ FIX: Fine chỉ nhận BorrowRecord (đã có ReaderName, BookTitle sẵn)
             if (wasOverdue)
             {
                 Fine fine = new Fine(record);
