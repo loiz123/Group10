@@ -83,6 +83,7 @@ namespace Library_Management
             Console.WriteLine("4. Báo cáo & Thống kê");
             Console.WriteLine("0. Thoát chương trình");
             Console.WriteLine("=========================================");
+        
         }
 
         // =====================================================================
@@ -167,15 +168,26 @@ namespace Library_Management
             string address = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(address)) address = "N/A";
 
-            Console.Write("Loại bạn đọc (SinhVien/GiangVien): ");
-            string type = Console.ReadLine();
+            Console.Write("Loại bạn đọc (1.Student/2.Teacher): ");
+           string type = Console.ReadLine();
+            if (type == "1")
+                type = "Student";
+            else if (type == "2")
+                type = "Teacher";
             if (string.IsNullOrWhiteSpace(type))
             {
                 Console.WriteLine("Loại bạn đọc không được để trống.");
                 return;
             }
+            Console.Write("Số sách được mượn tối đa (Enter để mặc định 3): ");
+            string maxBorrowInput = Console.ReadLine();
+            int maxBorrow = 3;
+            if (!string.IsNullOrWhiteSpace(maxBorrowInput) && int.TryParse(maxBorrowInput, out int parsedMaxBorrow))
+            {
+                maxBorrow = parsedMaxBorrow;
+            }
 
-            Reader newReader = new Reader(id, name, phone, email, address, type, 3);
+            Reader newReader = new Reader(id, name, phone, email, address, type, maxBorrow);
             _readerService.Add(newReader);
             Console.WriteLine("Thêm bạn đọc thành công.");
         }
