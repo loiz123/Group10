@@ -1,4 +1,4 @@
-# 📚 Library Management System
+#  Library Management System
 
 Hệ thống quản lý mượn/trả sách thư viện viết bằng **C#**, áp dụng 4 tính chất OOP: Encapsulation, Abstraction, Inheritance, Polymorphism.
 
@@ -6,7 +6,7 @@ Hệ thống quản lý mượn/trả sách thư viện viết bằng **C#**, á
 
 ---
 
-## 👥 Thành viên nhóm
+##  Thành viên nhóm
 
 | Thành viên | Phụ trách | Branch |
 |---|---|---|
@@ -17,7 +17,7 @@ Hệ thống quản lý mượn/trả sách thư viện viết bằng **C#**, á
 
 ---
 
-## 🗂️ Cấu trúc dự án
+##  Cấu trúc dự án
 
 ```
 LibraryManagement/
@@ -47,14 +47,14 @@ LibraryManagement/
 
 ---
 
-## ⚙️ Yêu cầu
+##  Yêu cầu
 
 - [.NET SDK 6.0+](https://dotnet.microsoft.com/download)
 - Không dùng thư viện ngoài — chỉ `System.Text.Json` (built-in)
 
 ---
 
-## 🚀 Chạy chương trình
+##  Chạy chương trình
 
 ```bash
 # Clone repo
@@ -67,7 +67,7 @@ dotnet run
 
 ---
 
-## 🔍 Các tính chất OOP trong dự án
+##  Các tính chất OOP trong dự án
 
 ### Abstraction
 - `Person` là abstract class — không tạo object trực tiếp
@@ -87,7 +87,7 @@ dotnet run
 
 ---
 
-## 💾 Lưu trữ dữ liệu
+##  Lưu trữ dữ liệu
 
 Dữ liệu được lưu ra file JSON trong thư mục `data/` bằng `System.Text.Json`.  
 `FileStorage<T>` là generic class xử lý Save/Load cho mọi kiểu dữ liệu.
@@ -110,7 +110,7 @@ data/fines.json          ← phiếu phạt
 
 ---
 
-## 🌿 Git workflow
+##  Git workflow
 
 ```bash
 # Tạo branch trước khi làm
@@ -124,11 +124,11 @@ git checkout main
 git merge feature/<tên-thành-viên>
 ```
 
-> ⚠️ **ReaderService.cs:** Đại Phát commit trước. Nam Anh tạo branch riêng để tích hợp FileStorage, sau đó mới merge — không viết lại từ đầu.
+>  **ReaderService.cs:** Đại Phát commit trước. Nam Anh tạo branch riêng để tích hợp FileStorage, sau đó mới merge — không viết lại từ đầu.
 
 ---
 
-## ✅ Definition of Done
+##  Definition of Done
 
 Một task được coi là hoàn thành khi:
 - [ ] Code chạy được, không lỗi build
