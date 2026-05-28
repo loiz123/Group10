@@ -174,6 +174,11 @@ namespace Library_Management
                 type = "Student";
             else if (type == "2")
                 type = "Teacher";
+            else 
+            {
+                Console.WriteLine("Loại bạn đọc không hợp lệ");    
+                return;
+            }
             if (string.IsNullOrWhiteSpace(type))
             {
                 Console.WriteLine("Loại bạn đọc không được để trống.");
@@ -182,14 +187,17 @@ namespace Library_Management
             Console.Write("Số sách được mượn tối đa (Enter để mặc định 3): ");
             string maxBorrowInput = Console.ReadLine();
             int maxBorrow = 3;
-            if (!string.IsNullOrWhiteSpace(maxBorrowInput) && int.TryParse(maxBorrowInput, out int parsedMaxBorrow))
+            if (!string.IsNullOrWhiteSpace(maxBorrowInput) && int.TryParse(maxBorrowInput, out int parsedMaxBorrow)&& parsedMaxBorrow > 0)
             {
                 maxBorrow = parsedMaxBorrow;
             }
 
             Reader newReader = new Reader(id, name, phone, email, address, type, maxBorrow);
             _readerService.Add(newReader);
-            Console.WriteLine("Thêm bạn đọc thành công.");
+          
+
+
+
         }
 
         private void SearchReader()
@@ -366,7 +374,7 @@ namespace Library_Management
 
             Book newBook = new Book(id, title, author, category, publisher, qty);
             _bookService.Add(newBook);
-            Console.WriteLine("Thêm sách thành công.");
+          
         }
         private void SearchBookByTitle()
         {
