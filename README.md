@@ -34,7 +34,7 @@ LibraryManagement/
 │   ├── ReaderService.cs
 │   ├── BookService.cs
 │   └── BorrowService.cs
-├── Storage/
+├── FileStorage/
 │   └── FileStorage.cs      # Generic JSON storage
 ├── data/
 │   ├── books.json
@@ -49,7 +49,7 @@ LibraryManagement/
 
 ##  Yêu cầu
 
-- [.NET SDK 6.0+](https://dotnet.microsoft.com/download)
+- [.NET SDK 8.0+](https://dotnet.microsoft.com/download)
 - Không dùng thư viện ngoài — chỉ `System.Text.Json` (built-in)
 
 ---
