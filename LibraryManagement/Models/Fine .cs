@@ -95,7 +95,7 @@ namespace Library_Management.Models
                 _amount = 0;
                 return;
             }
-            _amount = _overdueDays * 5000;
+            _amount = BorrowPolicy.Instance.CalculateFine(_overdueDays);
         }
 
         public void MarkAsPaid()

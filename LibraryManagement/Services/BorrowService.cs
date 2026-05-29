@@ -103,7 +103,7 @@ namespace Library_Management.Services
             record.ReaderName = reader.Name;
             record.BookTitle = book.Title;
             record.BorrowDate = DateTime.Now;
-            record.DueDate = DateTime.Now.AddDays(7);
+            record.DueDate = DateTime.Now.AddDays(BorrowPolicy.Instance.MaxBorrowDays);
 
             book.Checkout();
             reader.IncreaseBorrowCount();
