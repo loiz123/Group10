@@ -89,7 +89,7 @@ namespace Library_Management.Services
                 return false;
             }
   ;
-        
+
 
             // Tạo phiếu mượn chỉ với ID + tên để hiển thị
             BorrowRecord record = new BorrowRecord();
@@ -113,30 +113,29 @@ namespace Library_Management.Services
             return true;
         }
 
-        
-        public void ReturnBook(string recordId)
+
+        public bool ReturnBook(string recordId)
         {
             BorrowRecord? record = FindById(recordId);
             if (record == null)
             {
                 Console.WriteLine("Không tìm thấy phiếu mượn.");
-                return;
+                return false;
             }
 
             if (record.Status != BorrowStatus.Borrowing)
             {
                 Console.WriteLine("Phiếu mượn này đã được xử lý, không thể trả lại lần nữa.");
-                return;
+                return false;
             }
 
-            // Lookup qua Service để lấy đúng instance đang dùng
             Reader? reader = _readerService.FindById(record.ReaderId);
             Book? book = _bookService.FindById(record.BookId);
 
             if (reader == null || book == null)
             {
                 Console.WriteLine("Không tìm thấy sách hoặc bạn đọc trong dữ liệu hiện tại.");
-                return;
+                return false;
             }
 
             bool wasOverdue = record.IsOverdue();
@@ -159,6 +158,7 @@ namespace Library_Management.Services
             _storage.Save(_records);
 
             Console.WriteLine("Trả sách thành công.");
+            return true;
         }
 
         public List<BorrowRecord> GetOverdueRecords()
