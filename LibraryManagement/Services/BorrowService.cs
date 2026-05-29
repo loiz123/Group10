@@ -66,8 +66,8 @@ namespace Library_Management.Services
             }
         }
 
-    
-        public void BorrowBook(string readerId, string bookId, Librarian librarian)
+
+        public bool BorrowBook(string readerId, string bookId, Librarian librarian)
         {
             Reader? reader = _readerService.FindById(readerId);
             Book? book = _bookService.FindById(bookId);
@@ -75,25 +75,21 @@ namespace Library_Management.Services
             if (reader == null || book == null)
             {
                 Console.WriteLine("Không tìm thấy bạn đọc hoặc sách.");
-                return;
-            }
-
-            if (librarian == null)
-            {
-                Console.WriteLine("Không tìm thấy thủ thư xử lý.");
-                return;
+                return false;
             }
 
             if (!book.IsAvailable())
             {
                 Console.WriteLine("Sách hiện không còn để mượn.");
-                return;
+                return false;
             }
 
             if (!librarian.ApproveBorrow(reader))
             {
-                return;
+                return false;
             }
+  ;
+        
 
             // Tạo phiếu mượn chỉ với ID + tên để hiển thị
             BorrowRecord record = new BorrowRecord();
@@ -114,6 +110,7 @@ namespace Library_Management.Services
             _storage.Save(_records);
 
             Console.WriteLine("Mượn sách thành công.");
+            return true;
         }
 
         
