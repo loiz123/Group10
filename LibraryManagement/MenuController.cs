@@ -194,7 +194,7 @@ namespace Library_Management
             Console.Write("Nhập ID: ");
             string id = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(id)) { Console.WriteLine("ID không được để trống."); return; }
-            if(_readerService.FindById(id) != null) { Console.WriteLine($"ID '{id}' đã tồn tại. Vui lòng chọn ID khác."); return; }
+            if (_readerService.FindById(id) != null) { Console.WriteLine($"ID '{id}' đã tồn tại. Vui lòng chọn ID khác."); return; }
             Console.Write("Nhập Tên: ");
             string name = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(name)) { Console.WriteLine("Tên không được để trống."); return; }
@@ -348,6 +348,7 @@ namespace Library_Management
             Console.Write("Nhập ID sách: ");
             string id = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(id)) { Console.WriteLine("ID không được để trống."); return; }
+            if (_bookService.FindById(id) != null) { Console.WriteLine($"ID '{id}' đã tồn tại. Vui lòng chọn ID khác."); return; }
 
             Console.Write("Nhập Tựa đề: ");
             string title = Console.ReadLine();
@@ -510,9 +511,11 @@ namespace Library_Management
             string readerId = Console.ReadLine();
             Console.Write("Nhập ID sách: ");
             string bookId = Console.ReadLine();
-            _borrowService.BorrowBook(readerId, bookId, _currentLibrarian);
 
-            // Tạo thông báo sau khi mượn thành công
+            bool success = _borrowService.BorrowBook(readerId, bookId, _currentLibrarian);
+            if (!success) return;
+
+            // Chỉ tạo thông báo khi mượn thành công
             Reader r = _readerService.FindById(readerId);
             Book b = _bookService.FindById(bookId);
             if (r != null && b != null)
@@ -550,10 +553,12 @@ namespace Library_Management
 
             string recordId = borrowing[choice - 1].RecordId;
             BorrowRecord record = borrowing[choice - 1];
-            bool wasOverdue = record.IsOverdue(); // kiểm tra TRƯỚC khi trả
-            _borrowService.ReturnBook(recordId);
+            bool wasOverdue = record.IsOverdue();
 
-            // Tạo thông báo trả sách
+            bool success = _borrowService.ReturnBook(recordId);
+            if (!success) return;
+
+            // Chỉ tạo thông báo khi trả thành công
             if (wasOverdue)
             {
                 Notification n = new Notification(
@@ -711,8 +716,8 @@ namespace Library_Management
             }
         }
 
-        
-         private void UpdateBorrowPolicy()
+
+        private void UpdateBorrowPolicy()
         {
             Console.WriteLine("\n[CẬP NHẬT CHÍNH SÁCH MƯỢN]");
             Console.WriteLine("Hiện tại: " + BorrowPolicy.Instance.GetInfo());
@@ -760,7 +765,7 @@ namespace Library_Management
             BorrowPolicy.Instance.Save();
             Console.WriteLine("Đã cập nhật: " + BorrowPolicy.Instance.GetInfo());
         }
-     
+
         private void PrintCategories()
         {
             if (_categories.Count == 0) { Console.WriteLine("Chưa có thể loại nào."); return; }
@@ -783,6 +788,20 @@ namespace Library_Management
             Console.Write("Nhập mô tả (Enter để bỏ qua): ");
             string desc = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(desc)) desc = "";
+
+            for (int i = 0; i < _categories.Count; i++)
+            {
+                if (_categories[i].CategoryId == id)
+                {
+                    Console.WriteLine($"Mã thể loại '{id}' đã tồn tại.");
+                    return;
+                }
+                if (_categories[i].CategoryName.ToLower() == name.ToLower())
+                {
+                    Console.WriteLine($"Tên thể loại '{name}' đã tồn tại.");
+                    return;
+                }
+            }
 
             _categories.Add(new Category(id, name, desc));
             _categoryStorage.Save(_categories);
