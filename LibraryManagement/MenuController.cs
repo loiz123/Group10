@@ -194,7 +194,7 @@ namespace Library_Management
             Console.Write("Nhập ID: ");
             string id = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(id)) { Console.WriteLine("ID không được để trống."); return; }
-
+            if(_readerService.FindById(id) != null) { Console.WriteLine($"ID '{id}' đã tồn tại. Vui lòng chọn ID khác."); return; }
             Console.Write("Nhập Tên: ");
             string name = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(name)) { Console.WriteLine("Tên không được để trống."); return; }
@@ -673,6 +673,7 @@ namespace Library_Management
             {
                 Console.WriteLine($"{i + 1}. {result[i].GetInfo()}");
                 result[i].MarkAsRead();
+                _notificationStorage.Save(_notifications);
             }
         }
 
